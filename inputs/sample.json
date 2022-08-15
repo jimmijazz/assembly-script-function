@@ -1,0 +1,25 @@
+{
+    "cart": {
+      "buyerIdentity": {
+        "email": "joshua.bitossi@shopify.com",
+        "phone": "12345678",
+        "countryCode": "AU"
+      },
+      "lines": [
+        {
+          "cost": {
+            "amountPerQuantity": { "amount": "10.99" }
+          },
+          "id": "123456789",
+          "quantity": 2
+        }
+      ],
+      "attributes": [
+        {
+          "key": "cart_attribute",
+          "value": "This is a cart attribute"
+        }
+      ]
+    }
+  }
+  

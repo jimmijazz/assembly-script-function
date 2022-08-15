@@ -1,0 +1,6 @@
+{
+  "extends": "assemblyscript/std/assembly.json",
+  "include": [
+    "./**/*.ts"
+, "../node_modules/@types/functions/index.d.ts", "index.ts"  ]
+}

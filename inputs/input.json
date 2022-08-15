@@ -1,0 +1,50 @@
+{
+  "cart": {
+    "lines": [
+      {
+        "id": "gid://shopify/CartLine/0",
+        "quantity": 2,
+        "attribute": {
+          "key": "location",
+          "value": "brisbane"
+        },
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "1000.0"
+          }
+        },
+        "merchandise": {
+          "id": "gid://shopify/ProductVariant/42990429831383",
+          "brisbanePricing": {
+            "value": "600.0"
+          },
+          "sydneyPricing": {
+            "value": "950.0"
+          },
+          "melbournePricing": {
+            "value": "800.0"
+          }
+        }
+      }
+    ],
+    "cost": {
+      "totalAmount": {
+        "amount": "2000.0",
+        "currencyCode": "AUD"
+      },
+      "subtotalAmount": {
+        "amount": "2000.0",
+        "currencyCode": "AUD"
+      },
+      "totalTaxAmount": null,
+      "totalDutyAmount": null
+    },
+    "buyerIdentity": null,
+    "attribute": null
+  },
+  "discountNode": {
+    "metafield": {
+      "value": "{}"
+    }
+  }
+}
