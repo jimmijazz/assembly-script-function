@@ -1,7 +1,9 @@
+/* Sample Function that reads a line item attribute, and applies a variant discount based on a metafield value stored against that variant */
+
 import "wasi";
-import { Console } from "as-wasi/assembly";
-import { JSON, JSONEncoder } from "assemblyscript-json/assembly";
-import { Arr, Bool, Float, Obj } from "assemblyscript-json/assembly/JSON";
+import { Console } from "as-wasi/assembly"; // For reading input & output
+import { JSON, JSONEncoder } from "assemblyscript-json/assembly"; // For working with JSON and objects
+import { Arr, Bool, Float, Obj } from "assemblyscript-json/assembly/JSON"; // Specific JSON object types
 
 let stdin = Console.readAll();
 let input: JSON.Obj = <JSON.Obj>(JSON.parse(stdin));
@@ -14,43 +16,38 @@ let discounts = JSON.Value.Array();
 // Find our location attributedd
 let linesArray = lines.valueOf();
 
-/* GET CART ATTRIBUTES (DEPRECATED) - Stopped using cart attributes because they won't work with all checkouts and were being removed when going from cart > checkout. Using all line item props and metafields now
-*/
 
-// let attributes = input.getObj("cart")!.getObj("attribute") as JSON.Obj; // Initially thought this would be an array, but in our input.json we specify just the attribute we want
-// let location_key:string = "location"
-// let selected_location:string = "";
+/* GET CART ATTRIBUTES (DEPRECATED) - Stopped using cart attributes because they won't work with all checkouts and were being removed when going from cart > checkout. Using all line item props and metafields now 
 
-// if (attributes) {
-//   let attributeValue = attributes.getString("value");
-//   if (attributeValue) {
-//     selected_location = attributeValue.valueOf()
-//   }
-// };
+let attributes = input.getObj("cart")!.getObj("attribute") as JSON.Obj; // Initially thought this would be an array, but in our input.json we specify just the attribute we want
+let location_key:string = "location"
+let selected_location:string = "";
 
-// attributes.valueOf().forEach((attribute) => { // Note: Cart attributes won't work on accelerated checkouts. Use line item properties
-//   let a = attribute as JSON.Obj;
-//   let location: JSON.Str | null = a.getString("key");
+if (attributes) {
+  let attributeValue = attributes.getString("value");
+  if (attributeValue) {
+    selected_location = attributeValue.valueOf()
+  }
+};
+
+attributes.valueOf().forEach((attribute) => { // Note: Cart attributes won't work on accelerated checkouts. Use line item properties
+  let a = attribute as JSON.Obj;
+  let location: JSON.Str | null = a.getString("key");
   
-//   if (location && location.toString() == location_key) {
-//     let valueOrNull: JSON.Str | null = a.getString("value");
-//     if (valueOrNull !== null) {
-//       selected_location = valueOrNull.valueOf();
-//     }
-//   };
-// });
+  if (location && location.toString() == location_key) {
+    let valueOrNull: JSON.Str | null = a.getString("value");
+    if (valueOrNull !== null) {
+      selected_location = valueOrNull.valueOf();
+    }
+  };
+});
 
+console.log(`Selected Location: ${selected_location.toString()}`);
 
- //END ATTRIBUTES CODE */
-
-// console.log(`Selected Location: ${selected_location.toString()}`);
-
+ END ATTRIBUTES CODE */
 
 for (let i = 0; i < linesArray.length; ++i) {
-
-
-
-  /*
+  /* Explanation of what we're doing
   For each line item, create our Discount Object - https://shopify.dev/api/functions/reference/order-discounts/graphql/common-objects/discount
   Once done we will have multiple discount objects (potentially one for each line item)
 
@@ -80,10 +77,10 @@ for (let i = 0; i < linesArray.length; ++i) {
         //     }`;
   */
 
-  let discount = JSON.Value.Object(); 
+  let discount = JSON.Value.Object(); // Create object that will contain our Function discounts
   let lineItemObj: JSON.Obj = linesArray[i] as JSON.Obj; // Convert our line item to a JSON Object
 
-  // Get Line Item Selected Location (replacing cart attribute approach)
+  // Get Line Item select location from line item attribute (replacing cart attribute approach)
   let location_key: string = "location";
   let selected_location:string  = "";
 
@@ -93,9 +90,8 @@ for (let i = 0; i < linesArray.length; ++i) {
     let selected_location_value = line_attributes.getString("value");
     if (selected_location_value) {
       selected_location = selected_location_value.valueOf();
-    }
-  }
-
+    };
+  };
 
   // Line item price
   let linePriceVal: JSON.Str | null = JSON.Value.String("");
@@ -106,10 +102,8 @@ for (let i = 0; i < linesArray.length; ++i) {
     let linePriceAmountPerQuantityObj = linePriceCostObj.getObj("amountPerQuantity");
     if (linePriceAmountPerQuantityObj) {
       linePriceVal = linePriceAmountPerQuantityObj.getString("amount");
-    }
-  }
-
-
+    };
+  };
 
   // Create fields for Discount Object
   let conditions = JSON.Value.Array();
@@ -130,14 +124,12 @@ for (let i = 0; i < linesArray.length; ++i) {
 
   /* Update our discount and discount message based on the selected location. 
     This is really the only section that's unique to this particular Function. The rest will be fairly re-usable
-
     TODO: Add better type / null checking
   */
   if (selected_location) {
     message = JSON.Value.String(`${selected_location} Pricing`); // Set our discount message Eg Brisbane Pricing
     let merchandiseObj: JSON.Obj | null = lineItemObj.getObj('merchandise');
     let pricingObject: JSON.Obj | null;
-
 
     if (merchandiseObj) {
       // Product Variant ID
@@ -159,6 +151,7 @@ for (let i = 0; i < linesArray.length; ++i) {
       };
     };
   };
+
   valueFixedAmount.set("amount", discountAmount);
   value.set("fixedAmount", valueFixedAmount)
 
@@ -168,10 +161,10 @@ for (let i = 0; i < linesArray.length; ++i) {
   discount.set("targets", targets);
   discount.set("value", value);
   discounts.push(discount); // Add to our discounts array
-}
+};
 
 // Create our FunctionResult Object - https://shopify.dev/api/functions/reference/order-discounts/graphql/functionresult
 output.set("discounts", discounts);
 output.set("discountApplicationStrategy", JSON.from("MAXIMUM"));
 
-Console.log(output.stringify());
+Console.log(output.stringify()); // Similar to the Output.cart = Input.cart in Shopify Scripts, we output the final result
